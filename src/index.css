@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* DayPicker Custom Styles - Modern Minimalist (Compact) */
+.rdp {
+  --rdp-cell-size: 32px !important;
+  --rdp-accent-color: #4CAF50 !important; /* 主色 */
+  --rdp-background-color: #E8F5E9 !important; /* 辅助色背景 */
+  --rdp-outline: 2px solid #4CAF50 !important;
+  --rdp-outline-selected: 2px solid #4CAF50 !important;
+  --rdp-selected-color: #4CAF50 !important;
+  
+  margin: 0 !important;
+  font-size: 0.875rem !important;
+  
+  /* 强制根元素颜色为黑色，避免继承蓝色 */
+  color: #1e293b !important;
+}
+
+/* 彻底清除所有可能的蓝色 Focus Ring */
+.rdp *:focus-visible,
+.rdp *:focus,
+.rdp *:active {
+  outline: 2px solid #4CAF50 !important;
+  outline-offset: 1px !important;
+  box-shadow: 0 0 0 2px #E8F5E9 !important;
+}
+
+/* 全局链接颜色覆盖 */
+a {
+  color: inherit; /* 默认继承，避免浏览器默认蓝 */
+  text-decoration: none;
+}
+
+a:hover {
+  color: #388E3C; /* 强调色 */
+}
+
+/* 全局按钮与表单焦点颜色覆盖 */
+button:focus, 
+input:focus, 
+select:focus, 
+textarea:focus {
+  outline-color: #4CAF50 !important;
+  border-color: #4CAF50 !important;
+  --tw-ring-color: #81C784 !important; /* 辅助色 ring */
+}
+
+/* 强制覆盖 Tailwind Emerald 为指定绿色 (如果不想改太多类名的话，这是一个 Hack，但更稳妥是替换类名) */
+/* 这里我们采用 CSS 变量覆盖法，或者直接针对特定类名覆盖 */
+.text-emerald-600 { color: #4CAF50 !important; }
+.text-emerald-700 { color: #388E3C !important; }
+.bg-emerald-600 { background-color: #4CAF50 !important; }
+.bg-emerald-700 { background-color: #388E3C !important; }
+.border-emerald-500 { border-color: #4CAF50 !important; }
+.border-emerald-600 { border-color: #4CAF50 !important; }
+.focus\:ring-emerald-500:focus { --tw-ring-color: #4CAF50 !important; }
+.hover\:text-emerald-600:hover { color: #4CAF50 !important; }
+.hover\:bg-emerald-700:hover { background-color: #388E3C !important; }
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-toast-lifecycle {
+  animation: toastLifecycle 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes toastLifecycle {
+  0% { 
+    opacity: 0; 
+    transform: translateY(-20px); 
+  }
+  11.5% { /* ~300ms */
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+  88.5% { /* ~2300ms (300ms + 2000ms) */
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+  100% { /* 2600ms */
+    opacity: 0; 
+    transform: translateY(-20px); 
+  }
+}

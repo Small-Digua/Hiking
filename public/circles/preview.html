@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>圆形图标裁剪预览</title>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 30px; color: #333; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .img-container {
+            width: 150px;
+            height: 150px;
+            /* 棋盘格背景，用于检查透明度 */
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .label {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            font-family: monospace;
+        }
+        /* 深色模式预览 */
+        .dark-mode-preview {
+            margin-top: 40px;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        .dark-mode-preview h2 { color: white; }
+    </style>
+</head>
+<body>
+    <h1>图标裁剪效果预览 (透明背景检查)</h1>
+    
+    <div class="grid">
+        <!-- 生成 16 个格子 -->
+        <script>
+            for (let i = 1; i <= 16; i++) {
+                let num = i.toString().padStart(2, '0');
+                document.write(`
+                    <div class="item">
+                        <div class="img-container">
+                            <img src="circle_${num}.png" alt="Circle ${num}">
+                        </div>
+                        <div class="label">circle_${num}.png</div>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+
+    <div class="dark-mode-preview">
+        <h2>深色背景效果预览</h2>
+        <div class="grid" style="background: #333; border: 1px solid #444;">
+             <script>
+                for (let i = 1; i <= 16; i++) {
+                    let num = i.toString().padStart(2, '0');
+                    document.write(`
+                        <div class="item">
+                            <div class="img-container" style="background: #222; border-color: #444;">
+                                <img src="circle_${num}.png" alt="Circle ${num}">
+                            </div>
+                            <div class="label" style="color: #aaa;">circle_${num}.png</div>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+    </div>
+</body>
+</html>

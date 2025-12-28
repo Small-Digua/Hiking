@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>头像裁剪效果对比</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; background: #f8fafc; color: #334155; }
+        h1 { text-align: center; margin-bottom: 40px; color: #0f172a; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .comparison { display: flex; gap: 20px; justify-content: center; align-items: center; }
+        .img-box { text-align: center; }
+        .img-box img { width: 100px; height: 100px; border-radius: 8px; }
+        .img-box.circle img { background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+        .label { display: block; margin-top: 10px; font-size: 12px; font-weight: bold; color: #64748b; }
+        .arrow { color: #cbd5e1; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <h1>🎨 头像裁剪效果对比</h1>
+    <div class="grid">
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_01_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_01.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_02_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_02.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_03_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_03.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_04_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_04.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_05_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_05.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_06_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_06.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_07_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_07.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_08_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_08.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_09_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_09.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_10_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_10.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="comparison">
+                <div class="img-box">
+                    <img src="avatar_11_square.png" alt="Original">
+                    <span class="label">原图裁剪</span>
+                </div>
+                <div class="arrow">➜</div>
+                <div class="img-box circle">
+                    <img src="avatar_11.png" alt="Processed">
+                    <span class="label">圆形优化</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

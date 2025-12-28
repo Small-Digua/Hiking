@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini 图标全屏预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #1a1a1a;
+            font-family: system-ui, -apple-system, sans-serif;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* 防止滚动条 */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: none; /* 隐藏标题以最大化空间，或者设为绝对定位悬浮 */
+        }
+
+        .grid-container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            /* 4x4 网格，完全填满 */
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 0; /* 无间隙 */
+        }
+
+        .item {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* 棋盘格背景 */
+            background-image: 
+                linear-gradient(45deg, #2a2a2a 25%, transparent 25%), 
+                linear-gradient(-45deg, #2a2a2a 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #2a2a2a 75%), 
+                linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+            background-size: 20px 20px;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05); /* 极细微边框区分网格 */
+            overflow: hidden;
+        }
+
+        .item img {
+            /* 尽可能填满格子，保留一点点呼吸空间或完全填满 */
+            width: 90%; 
+            height: 90%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        .item:hover img {
+            transform: scale(1.1);
+        }
+
+        .label {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            font-family: monospace;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <script>
+            for (let i = 1; i <= 16; i++) {
+                let num = i.toString().padStart(2, '0');
+                document.write(`
+                    <div class="item">
+                        <img src="circle_${num}.png" alt="Circle ${num}">
+                        <div class="label">${num}</div>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+</body>
+</html>
