@@ -9,7 +9,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "seed": "tsx scripts/seedData.ts",
-    "db:setup": "tsx scripts/setupDb.ts"
+    "db:setup": "tsx scripts/setupDb.ts",
+    "db:admin": "tsx scripts/runAdminMigration.ts",
+    "db:auth": "tsx scripts/runAuthMigration.ts",
+    "db:email": "tsx scripts/runEmailSync.ts",
+    "db:storage": "tsx scripts/runStorageMigration.ts",
+    "db:routes": "tsx scripts/runRoutesUpdate.ts",
+    "db:realtime": "tsx scripts/runRealtimeMigration.ts",
+    "server": "cd server && npm start"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.89.0",
@@ -18,6 +25,7 @@
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-quill-new": "^3.7.0",
     "react-router-dom": "^7.11.0",
     "tailwind-merge": "^3.4.0"
   },
