@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Link, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Mountain, LogOut, User as UserIcon, Settings, Heart, Share2, CalendarPlus, Map, Calendar, User } from 'lucide-react'
 import { AddToPlanModal } from './AddToPlanModal'
 import clsx from 'clsx'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
-import { supabase } from '../services/supabase'
+
 import { dataService } from '../services/dataService'
 
 export default function Layout() {
@@ -96,7 +96,7 @@ export default function Layout() {
     
     try {
       // 只传递必填字段和可选的status字段，不传递数据库自动生成的字段
-      const { data, error } = await dataService.createItinerary({
+      const { error } = await dataService.createItinerary({
         user_id: user.id,
         route_id: selectedRoute.id,
         planned_date: date.toISOString(),

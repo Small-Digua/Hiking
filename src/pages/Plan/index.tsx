@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { format, isSameDay } from 'date-fns'
+import { format } from 'date-fns'
 import { Calendar as CalendarIcon, Route, Plus, AlertTriangle, Loader2, History } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'

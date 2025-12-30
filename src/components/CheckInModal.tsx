@@ -181,10 +181,6 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
     }
   }
   
-  const formatDurationText = (dur: string) => {
-    if (!dur || dur.trim() === '') return '0分钟'
-    return dur // 直接返回，因为DurationInput已经格式化为"X小时X分钟"
-  }
 
   const renderForm = () => (
     <div className="p-5 space-y-5">

@@ -9,8 +9,7 @@ interface DurationInputProps {
 export function DurationInput({ value, onChange, className }: DurationInputProps) {
   const [hours, setHours] = useState('0');
   const [minutes, setMinutes] = useState('0');
-  const [isHoursFocused, setIsHoursFocused] = useState(false);
-  const [isMinutesFocused, setIsMinutesFocused] = useState(false);
+  
 
   // 解析传入的值并设置小时和分钟
   useEffect(() => {
@@ -37,13 +36,11 @@ export function DurationInput({ value, onChange, className }: DurationInputProps
 
       setHours(parsedHours > 0 ? parsedHours.toString() : '0');
       setMinutes(parsedMinutes > 0 ? parsedMinutes.toString() : '0');
-      setIsHoursFocused(false);
-      setIsMinutesFocused(false);
+      
     } else {
       setHours('0');
       setMinutes('0');
-      setIsHoursFocused(false);
-      setIsMinutesFocused(false);
+      
     }
   }, [value]);
 
@@ -63,14 +60,12 @@ export function DurationInput({ value, onChange, className }: DurationInputProps
   };
 
   const handleHoursFocus = () => {
-    setIsHoursFocused(true);
     if (hours === '0') {
       setHours('');
     }
   };
 
   const handleMinutesFocus = () => {
-    setIsMinutesFocused(true);
     if (minutes === '0') {
       setMinutes('');
     }
@@ -79,14 +74,12 @@ export function DurationInput({ value, onChange, className }: DurationInputProps
   const handleHoursBlur = () => {
     if (hours === '') {
       setHours('0');
-      setIsHoursFocused(false);
     }
   };
 
   const handleMinutesBlur = () => {
     if (minutes === '') {
       setMinutes('0');
-      setIsMinutesFocused(false);
     }
   };
 
