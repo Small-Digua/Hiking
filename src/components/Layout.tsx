@@ -24,21 +24,10 @@ export default function Layout() {
     const checkAdmin = async () => {
       if (user) {
         try {
-          // 尝试从 profiles 表获取角色
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-          
-          if (!error && data) {
-            setIsAdmin((data as any)?.role === 'admin')
-          } else {
-            // 如果 profiles 表不存在或没有 role 列，使用替代方案
-            // 检查 auth 用户的 email 是否是管理员邮箱
-            const adminEmails = ['admin@hiking.com', 'admin@example.com']
-            setIsAdmin(adminEmails.includes(user.email || ''))
-          }
+          // 直接使用替代方案检查管理员身份
+          // 检查 auth 用户的 email 是否是管理员邮箱
+          const adminEmails = ['admin@hiking.com', 'admin@example.com']
+          setIsAdmin(adminEmails.includes(user.email || ''))
         } catch (err) {
           console.error('检查管理员身份失败:', err)
           // 出错时，默认不显示管理图标

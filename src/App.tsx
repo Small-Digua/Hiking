@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import Plan from './pages/Plan'
 import Record from './pages/Record'
+import RecordDetail from './pages/Record/Detail'
 import Profile from './pages/Profile'
 import RouteDetail from './pages/Routes/Detail'
 import Login from './pages/Auth/Login'
@@ -57,6 +58,11 @@ function App() {
             <Route path="profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="records/:id" element={
+              <ProtectedRoute>
+                <RecordDetail />
               </ProtectedRoute>
             } />
           </Route>

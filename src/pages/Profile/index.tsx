@@ -265,15 +265,19 @@ export default function Profile() {
           ) : history.length > 0 ? (
             <div className="relative border-l-2 border-slate-200 ml-3 space-y-8">
               {history.map((record) => (
-                <div key={record.id} className="relative pl-8">
+                <div key={record.id} className="relative pl-6 cursor-pointer">
                   <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-white border-2 border-emerald-500"></div>
-                  <div className="mb-1 text-sm font-semibold text-emerald-600">
-                    {record.completed_at ? format(new Date(record.completed_at), 'yyyy-MM-dd') : ''}
-                  </div>
-                  <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-100 hover:border-emerald-500 hover:shadow-lg transition-all duration-300 relative group overflow-hidden">
+                  <div 
+                    className="bg-white p-4 sm:p-5 rounded-lg border border-slate-100 hover:border-emerald-500 hover:shadow-lg transition-all duration-300 relative group overflow-hidden"
+                    onClick={() => navigate(`/records/${record.id}`)}
+                  >
+                    <div className="mb-2 text-sm font-semibold text-emerald-600">
+                      {record.completed_at ? format(new Date(record.completed_at), 'yyyy-MM-dd') : ''}
+                    </div>
                     {/* 删除按钮 - 仅在悬停时显示，增大尺寸以适应移动端 */}
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation(); // 阻止事件冒泡到卡片
                         if (window.confirm('确定要删除这条历史足迹吗？此操作不可恢复。')) {
                           const deleteRecord = async () => {
                             try {
@@ -314,7 +318,7 @@ export default function Profile() {
                           deleteRecord()
                         }
                       }}
-                      className="absolute top-2 right-2 p-2 w-10 h-10 rounded-full text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 active:text-emerald-600 active:bg-emerald-50 active:border-emerald-200 border border-slate-200 transition-all duration-200 transform scale-0 group-hover:scale-100 focus:outline-none focus:ring-2 focus:ring-emerald-200 z-10 flex items-center justify-center"
+                      className="absolute top-2 right-2 p-1 w-6 h-6 rounded-full text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 active:text-emerald-600 active:bg-emerald-50 active:border-emerald-200 border border-slate-200 transition-all duration-200 transform scale-0 group-hover:scale-100 focus:outline-none focus:ring-2 focus:ring-emerald-200 z-10 flex items-center justify-center"
                       aria-label="删除历史足迹"
                     >
                       <span className="text-sm font-bold">×</span>
@@ -323,7 +327,8 @@ export default function Profile() {
                     {/* 优化布局，在移动端垂直排列 */}
                     <div className="space-y-3 pr-10">
                       {/* 图片显示在标题上方，仅保留第一张图片 */}
-                      {record.media && record.media.length > 0 && (
+                      {/* 注释图片展示功能，保留代码以便未来使用 */}
+                      {/* {record.media && record.media.length > 0 && (
                         <div className="w-full rounded-lg overflow-hidden bg-slate-100">
                           <img 
                             src={record.media[0].url} 
@@ -336,7 +341,7 @@ export default function Profile() {
                             }}
                           />
                         </div>
-                      )}
+                      )} */}
                       <h4 className="text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-tight">{record.routes?.name || '未知路线'}</h4>
                       <div className="flex flex-wrap gap-2">
                         {record.distance && (
@@ -345,7 +350,7 @@ export default function Profile() {
                           </span>
                         )}
                         {record.duration && (
-                          <span className="text-xs sm:text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap">
+                          <span className="text-xs sm:text-sm bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full whitespace-nowrap">
                             时长：{formatDuration(record.duration)}
                           </span>
                         )}
