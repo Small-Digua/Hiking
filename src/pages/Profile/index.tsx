@@ -322,39 +322,34 @@ export default function Profile() {
                     
                     {/* 优化布局，在移动端垂直排列 */}
                     <div className="space-y-3 pr-10">
+                      {/* 图片显示在标题上方，仅保留第一张图片 */}
+                      {record.media && record.media.length > 0 && (
+                        <div className="w-full rounded-lg overflow-hidden bg-slate-100">
+                          <img 
+                            src={record.media[0].url} 
+                            className="w-full h-auto object-cover"
+                            alt="Record" 
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement
+                              target.src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=200&h=200&fit=crop'
+                            }}
+                          />
+                        </div>
+                      )}
                       <h4 className="text-base sm:text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-tight">{record.routes?.name || '未知路线'}</h4>
                       <div className="flex flex-wrap gap-2">
                         {record.distance && (
                           <span className="text-xs sm:text-sm bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            徒步路程：{record.distance}km
+                            路程：{record.distance}km
                           </span>
                         )}
                         {record.duration && (
                           <span className="text-xs sm:text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            徒步时长：{formatDuration(record.duration)}
+                            时长：{formatDuration(record.duration)}
                           </span>
                         )}
                       </div>
-                      {/* 优化文本可读性，增加行间距 */}
-                      <p className="text-sm sm:text-base text-slate-600 leading-relaxed break-words">{record.feelings || '未填写心得'}</p>
-                      {record.media && record.media.length > 0 && (
-                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {record.media.map((m, i) => (
-                            <img 
-                              key={i} 
-                              src={m.url} 
-                              className="rounded object-cover aspect-square hover:opacity-90 cursor-pointer transition-transform hover:scale-105 w-full h-full"
-                              alt="Record" 
-                              referrerPolicy="no-referrer"
-                              onClick={() => handleImageClick(record.media.map(media => media.url), i)}
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement
-                                target.src = 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=200&h=200&fit=crop'
-                              }}
-                            />
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
