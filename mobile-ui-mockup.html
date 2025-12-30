@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>徒步系统 - 小红书风格</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', PingFang SC, 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+            color: #111827;
+            line-height: 1.6;
+        }
+        
+        /* 小红书风格卡片 */
+        .xiaohongshu-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .xiaohongshu-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 渐变背景 */
+        .gradient-bg {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+        
+        /* 图片加载动画 */
+        .image-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* 淡入动画 */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 底部导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 60px;
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .nav-item.active {
+            color: #10B981;
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        /* 标签样式 */
+        .tag {
+            background: #10B981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* 评分星星 */
+        .star-rating {
+            color: #F59E0B;
+            font-size: 14px;
+        }
+        
+        /* 图片轮播指示器 */
+        .carousel-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 0 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-indicator.active {
+            width: 20px;
+            background: #10B981;
+            border-radius: 4px;
+        }
+        
+        /* 内容卡片间距 */
+        .content-card {
+            margin-bottom: 12px;
+        }
+        
+        /* 固定头部 */
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-[#f7f7f7]">
+    <!-- 模拟设备边框 -->
+    <div class="max-w-[393px] mx-auto border border-gray-300 rounded-[30px] overflow-hidden shadow-2xl" style="height: 852px; background: white;">
+        <!-- 屏幕内容 -->
+        <div class="relative overflow-auto h-full" style="scrollbar-width: none; -ms-overflow-style: none;">
+            <!-- 隐藏滚动条 -->
+            <div class="absolute inset-0" id="screenContent">
+                <!-- 首页 -->
+                <div id="homePage" class="pb-[70px]">
+                    <!-- 顶部搜索栏 -->
+                    <div class="sticky top-0 bg-white z-50 border-b border-gray-100">
+                        <div class="px-4 py-3">
+                            <div class="flex items-center bg-[#f0f0f0] rounded-full px-4 py-2">
+                                <i class="fa fa-search text-gray-400 mr-2"></i>
+                                <input type="text" placeholder="搜索徒步路线、目的地" class="bg-transparent border-none outline-none text-sm flex-1">
+                            </div>
+                        </div>
+                        
+                        <!-- 分类标签 -->
+                        <div class="px-4 py-2 overflow-x-auto whitespace-nowrap" style="scrollbar-width: none;">
+                            <div class="inline-flex space-x-3">
+                                <span class="px-3 py-1 bg-[#10B981] text-white rounded-full text-sm font-medium">🏔️ 热门路线</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">🔥 推荐</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">🔍 附近</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">💯 难度排行</span>
+                                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">📅 周末路线</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Banner轮播 -->
+                    <div class="relative h-[200px] mb-4">
+                        <div class="absolute inset-0">
+                            <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&h=200&fit=crop" alt="热门路线" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-4">
+                                <div class="text-white">
+                                    <h3 class="text-lg font-bold">深圳东西冲海岸线</h3>
+                                    <p class="text-sm opacity-90">徒步者心中的「治愈系天花板」</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 轮播指示器 -->
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex">
+                            <div class="carousel-indicator active"></div>
+                            <div class="carousel-indicator"></div>
+                            <div class="carousel-indicator"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 路线列表 -->
+                    <div class="px-4 space-y-4">
+                        <!-- 路线卡片1 -->
+                        <div class="xiaohongshu-card content-card fade-in">
+                            <div class="h-[200px]">
+                                <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&h=200&fit=crop" alt="东西冲海岸线" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-3">
+                                <h3 class="text-lg font-bold mb-2">🏔️ 东西冲海岸线穿越</h3>
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">⭐ 难度3.5</span>
+                                    <span class="text-sm text-gray-600">📏 8km</span>
+                                    <span class="text-sm text-gray-600">⏱️ 6h</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-gray-500">
+                                    <span>深圳 · 大鹏新区</span>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="flex items-center"><i class="fa fa-heart mr-1"></i> 128</span>
+                                        <span class="flex items-center"><i class="fa fa-star mr-1"></i> 56</span>
+                                        <span class="flex items-center"><i class="fa fa-comment mr-1"></i> 23</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 路线卡片2 -->
+                        <div class="xiaohongshu-card content-card fade-in" style="animation-delay: 0.1s;">
+                            <div class="h-[200px]">
+                                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop" alt="梧桐山" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-3">
+                                <h3 class="text-lg font-bold mb-2">🏔️ 梧桐山主峰路线</h3>
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">⭐ 难度4.0</span>
+                                    <span class="text-sm text-gray-600">📏 12km</span>
+                                    <span class="text-sm text-gray-600">⏱️ 8h</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-gray-500">
+                                    <span>深圳 · 罗湖区</span>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="flex items-center"><i class="fa fa-heart mr-1"></i> 96</span>
+                                        <span class="flex items-center"><i class="fa fa-star mr-1"></i> 42</span>
+                                        <span class="flex items-center"><i class="fa fa-comment mr-1"></i> 18</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 路线卡片3 -->
+                        <div class="xiaohongshu-card content-card fade-in" style="animation-delay: 0.2s;">
+                            <div class="h-[200px]">
+                                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=200&fit=crop" alt="七娘山" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-3">
+                                <h3 class="text-lg font-bold mb-2">🏔️ 七娘山登山路线</h3>
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">⭐ 难度4.5</span>
+                                    <span class="text-sm text-gray-600">📏 10km</span>
+                                    <span class="text-sm text-gray-600">⏱️ 7h</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-gray-500">
+                                    <span>深圳 · 大鹏新区</span>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="flex items-center"><i class="fa fa-heart mr-1"></i> 78</span>
+                                        <span class="flex items-center"><i class="fa fa-star mr-1"></i> 35</span>
+                                        <span class="flex items-center"><i class="fa fa-comment mr-1"></i> 12</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 路线卡片4 -->
+                        <div class="xiaohongshu-card content-card fade-in" style="animation-delay: 0.3s;">
+                            <div class="h-[200px]">
+                                <img src="https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=400&h=200&fit=crop" alt="羊台山" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-3">
+                                <h3 class="text-lg font-bold mb-2">🏔️ 羊台山绿道</h3>
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">⭐ 难度2.5</span>
+                                    <span class="text-sm text-gray-600">📏 6km</span>
+                                    <span class="text-sm text-gray-600">⏱️ 3h</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-gray-500">
+                                    <span>深圳 · 宝安区</span>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="flex items-center"><i class="fa fa-heart mr-1"></i> 156</span>
+                                        <span class="flex items-center"><i class="fa fa-star mr-1"></i> 68</span>
+                                        <span class="flex items-center"><i class="fa fa-comment mr-1"></i> 31</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 路线详情页 -->
+                <div id="detailPage" class="hidden pb-[70px]">
+                    <!-- 透明渐变头部 -->
+                    <div class="fixed-header" id="detailHeader" style="background: transparent;">
+                        <div class="flex items-center justify-between px-4 py-5 text-white">
+                            <button onclick="showPage('homePage')" class="p-2 rounded-full bg-black/20">
+                                <i class="fa fa-arrow-left text-xl"></i>
+                            </button>
+                            <div class="flex items-center space-x-3">
+                                <button class="p-2 rounded-full bg-black/20">
+                                    <i class="fa fa-share-alt text-xl"></i>
+                                </button>
+                                <button class="p-2 rounded-full bg-black/20">
+                                    <i class="fa fa-ellipsis-h text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 图片轮播 -->
+                    <div class="relative h-[300px]">
+                        <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&h=300&fit=crop" alt="东西冲海岸线" class="w-full h-full object-cover">
+                        <!-- 轮播指示器 -->
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex">
+                            <div class="carousel-indicator active"></div>
+                            <div class="carousel-indicator"></div>
+                            <div class="carousel-indicator"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 路线信息 -->
+                    <div class="px-4 py-3">
+                        <h1 class="text-2xl font-bold mb-3">🏔️ 东西冲海岸线穿越</h1>
+                        <div class="flex items-center space-x-3 mb-3">
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">⭐ 难度3.5</span>
+                            <span class="text-sm text-gray-600">📏 8km</span>
+                            <span class="text-sm text-gray-600">⏱️ 6h</span>
+                        </div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">深圳 · 大鹏新区</span>
+                            <span class="text-xs text-gray-500">2025-12-28</span>
+                        </div>
+                        
+                        <!-- 标签 -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="tag">#海岸线</span>
+                            <span class="tag">#深圳徒步</span>
+                            <span class="tag">#周末好去处</span>
+                            <span class="tag">#治愈系</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 详细内容 -->
+                    <div class="px-4 space-y-4 mb-4">
+                        <div class="xiaohongshu-card p-4">
+                            <h2 class="text-lg font-bold mb-3">📋 路线核心概览</h2>
+                            <p class="text-gray-700 mb-3 leading-relaxed">
+                                作为深圳最具代表性的海岸徒步路线，东西涌穿越以「悬崖礁石 + 玻璃海 + 滨海栈道」的绝美组合，直接封神徒步爱好者心中的「治愈系天花板」！
+                            </p>
+                            <p class="text-gray-700 leading-relaxed">
+                                沿途串联细腻软沙、嶙峋岛屿、千姿百态的礁石与海蚀岩，自然景观层次拉满，每一步都是壁纸级风景～
+                            </p>
+                        </div>
+                        
+                        <div class="xiaohongshu-card p-4">
+                            <h2 class="text-lg font-bold mb-3">📍 路线详情</h2>
+                            <div class="space-y-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 mb-1">经典行进方向</h3>
+                                    <p class="text-gray-700">东涌 → 西涌，全程约7-8公里</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 mb-1">最佳季节</h3>
+                                    <p class="text-gray-700">春秋两季（10-11月，3-4月）</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 mb-1">难度评级</h3>
+                                    <div class="flex items-center">
+                                        <div class="star-rating">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-half-o"></i>
+                                            <i class="fa fa-star-o"></i>
+                                        </div>
+                                        <span class="ml-2 text-gray-600 text-sm">中等难度，适合有一定经验的徒步者</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="xiaohongshu-card p-4">
+                            <h2 class="text-lg font-bold mb-3">🎒 必备装备</h2>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa fa-check-circle text-green-500"></i>
+                                    <span class="text-gray-700">登山鞋/徒步鞋</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa fa-check-circle text-green-500"></i>
+                                    <span class="text-gray-700">防晒帽/墨镜</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa fa-check-circle text-green-500"></i>
+                                    <span class="text-gray-700">充足饮用水（2L+）</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa fa-check-circle text-green-500"></i>
+                                    <span class="text-gray-700">能量补给</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa fa-check-circle text-green-500"></i>
+                                    <span class="text-gray-700">轻便背包</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa fa-check-circle text-green-500"></i>
+                                    <span class="text-gray-700">登山杖（可选）</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 互动区 -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <button class="flex flex-col items-center text-gray-600 hover:text-green-500 transition-colors">
+                                    <i class="fa fa-heart text-xl mb-1"></i>
+                                    <span class="text-xs">128</span>
+                                </button>
+                                <button class="flex flex-col items-center text-gray-600 hover:text-green-500 transition-colors">
+                                    <i class="fa fa-star text-xl mb-1"></i>
+                                    <span class="text-xs">56</span>
+                                </button>
+                                <button class="flex flex-col items-center text-gray-600 hover:text-green-500 transition-colors">
+                                    <i class="fa fa-comment text-xl mb-1"></i>
+                                    <span class="text-xs">23</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                                    <i class="fa fa-calendar-plus-o mr-1"></i> 加入计划
+                                </button>
+                                <button class="px-4 py-2 gradient-bg text-white rounded-full text-sm font-medium">
+                                    <i class="fa fa-map-marker mr-1"></i> 开始导航
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 个人中心 -->
+                <div id="profilePage" class="hidden pb-[70px]">
+                    <!-- 顶部背景 -->
+                    <div class="gradient-bg h-[200px] relative">
+                        <div class="absolute bottom-0 left-0 right-0 px-4 pb-4">
+                            <!-- 用户信息 -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="relative">
+                                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b81d?w=100&h=100&fit=crop&circle" alt="用户头像" class="w-16 h-16 rounded-full border-2 border-white">
+                                        <div class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+                                    </div>
+                                    <div class="ml-4 text-white">
+                                        <h2 class="text-xl font-bold">徒步小达人</h2>
+                                        <p class="text-sm opacity-90">764855101@qq.com</p>
+                                    </div>
+                                </div>
+                                <button class="p-2 rounded-full bg-white/20 text-white">
+                                    <i class="fa fa-cog text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- 数据卡片 -->
+                            <div class="flex justify-around mt-4">
+                                <div class="flex flex-col items-center text-white">
+                                    <div class="text-xl font-bold">12</div>
+                                    <div class="text-xs opacity-90">已完成路线</div>
+                                </div>
+                                <div class="flex flex-col items-center text-white">
+                                    <div class="text-xl font-bold">28</div>
+                                    <div class="text-xs opacity-90">收藏路线</div>
+                                </div>
+                                <div class="flex flex-col items-center text-white">
+                                    <div class="text-xl font-bold">86</div>
+                                    <div class="text-xs opacity-90">徒步里程（km）</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 功能入口 -->
+                    <div class="px-4 py-4">
+                        <div class="grid grid-cols-4 gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
+                                    <i class="fa fa-map-o text-green-500 text-xl"></i>
+                                </div>
+                                <span class="text-xs text-gray-700">我的路线</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-1">
+                                    <i class="fa fa-calendar-o text-yellow-500 text-xl"></i>
+                                </div>
+                                <span class="text-xs text-gray-700">我的计划</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-1">
+                                    <i class="fa fa-heart text-blue-500 text-xl"></i>
+                                </div>
+                                <span class="text-xs text-gray-700">我的收藏</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-1">
+                                    <i class="fa fa-camera text-purple-500 text-xl"></i>
+                                </div>
+                                <span class="text-xs text-gray-700">我的相册</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 我的收藏 -->
+                    <div class="px-4 py-2">
+                        <h2 class="text-lg font-bold mb-3">我的收藏</h2>
+                        <div class="space-y-3">
+                            <!-- 收藏卡片1 -->
+                            <div class="xiaohongshu-card flex items-center p-3">
+                                <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=100&h=100&fit=crop" alt="东西冲" class="w-full h-full object-cover">
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <h3 class="font-semibold text-gray-800 truncate">东西冲海岸线穿越</h3>
+                                    <div class="flex items-center text-xs text-gray-500 mt-1">
+                                        <span class="mr-2">⭐ 难度3.5</span>
+                                        <span>📏 8km</span>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-red-500 ml-2">
+                                    <i class="fa fa-heart"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- 收藏卡片2 -->
+                            <div class="xiaohongshu-card flex items-center p-3">
+                                <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&h=100&fit=crop" alt="梧桐山" class="w-full h-full object-cover">
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <h3 class="font-semibold text-gray-800 truncate">梧桐山主峰路线</h3>
+                                    <div class="flex items-center text-xs text-gray-500 mt-1">
+                                        <span class="mr-2">⭐ 难度4.0</span>
+                                        <span>📏 12km</span>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-red-500 ml-2">
+                                    <i class="fa fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部导航栏 -->
+            <div class="bottom-nav">
+                <button class="nav-item active" onclick="showPage('homePage')">
+                    <i class="fa fa-home"></i>
+                    <span>首页</span>
+                </button>
+                <button class="nav-item" onclick="showPage('detailPage')">
+                    <i class="fa fa-compass"></i>
+                    <span>发现</span>
+                </button>
+                <button class="nav-item">
+                    <i class="fa fa-plus-circle text-2xl"></i>
+                    <span class="text-xs">发布</span>
+                </button>
+                <button class="nav-item">
+                    <i class="fa fa-calendar-o"></i>
+                    <span>计划</span>
+                </button>
+                <button class="nav-item" onclick="showPage('profilePage')">
+                    <i class="fa fa-user"></i>
+                    <span>我的</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 显示指定页面
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('#homePage, #detailPage, #profilePage').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // 显示目标页面
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 根据页面设置导航激活状态
+            if (pageId === 'homePage') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (pageId === 'detailPage') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+            } else if (pageId === 'profilePage') {
+                document.querySelectorAll('.nav-item')[4].classList.add('active');
+            }
+            
+            // 滚动到顶部
+            document.getElementById('screenContent').scrollTop = 0;
+        }
+        
+        // 监听滚动事件，处理详情页头部变化
+        document.getElementById('screenContent').addEventListener('scroll', function() {
+            const detailHeader = document.getElementById('detailHeader');
+            if (detailHeader && !document.getElementById('detailPage').classList.contains('hidden')) {
+                const scrollTop = this.scrollTop;
+                if (scrollTop > 100) {
+                    detailHeader.style.background = 'white';
+                    detailHeader.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    detailHeader.querySelectorAll('button').forEach(btn => {
+                        btn.style.background = '#f0f0f0';
+                        btn.style.color = '#111827';
+                    });
+                } else {
+                    detailHeader.style.background = 'transparent';
+                    detailHeader.style.boxShadow = 'none';
+                    detailHeader.querySelectorAll('button').forEach(btn => {
+                        btn.style.background = 'rgba(0,0,0,0.2)';
+                        btn.style.color = 'white';
+                    });
+                }
+            }
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 模拟数据加载延迟，显示加载动画
+            setTimeout(() => {
+                document.querySelectorAll('.image-skeleton').forEach(skeleton => {
+                    skeleton.style.display = 'none';
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
