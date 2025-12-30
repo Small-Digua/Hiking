@@ -61,6 +61,14 @@ export interface Database {
           duration_hours: number
           distance_km: number
           cover_image_url: string | null
+          status: string | null
+          start_point: string | null
+          end_point: string | null
+          waypoints: string | null
+          tags: string[] | null
+          description: string | null
+          images: string[] | null
+          created_at: string
         }
         Insert: {
           id?: string
@@ -70,6 +78,14 @@ export interface Database {
           duration_hours: number
           distance_km: number
           cover_image_url?: string | null
+          status?: string | null
+          start_point?: string | null
+          end_point?: string | null
+          waypoints?: string | null
+          tags?: string[] | null
+          description?: string | null
+          images?: string[] | null
+          created_at?: string
         }
         Update: {
           id?: string
@@ -79,6 +95,14 @@ export interface Database {
           duration_hours?: number
           distance_km?: number
           cover_image_url?: string | null
+          status?: string | null
+          start_point?: string | null
+          end_point?: string | null
+          waypoints?: string | null
+          tags?: string[] | null
+          description?: string | null
+          images?: string[] | null
+          created_at?: string
         }
       }
       route_sections: {
@@ -112,6 +136,7 @@ export interface Database {
           planned_date: string
           status: 'Pending' | 'Completed'
           created_at: string
+          deleted_at?: string | null
         }
         Insert: {
           id?: string
@@ -120,6 +145,7 @@ export interface Database {
           planned_date: string
           status?: 'Pending' | 'Completed'
           created_at?: string
+          deleted_at?: string | null
         }
         Update: {
           id?: string
@@ -128,13 +154,15 @@ export interface Database {
           planned_date?: string
           status?: 'Pending' | 'Completed'
           created_at?: string
+          deleted_at?: string | null
         }
       }
       hiking_records: {
         Row: {
           id: string
-          itinerary_id: string
+          itinerary_id: string | null
           user_id: string
+          route_id: string | null
           completed_at: string
           feelings: string | null
           distance: number | null
@@ -143,8 +171,9 @@ export interface Database {
         }
         Insert: {
           id?: string
-          itinerary_id: string
+          itinerary_id?: string | null
           user_id: string
+          route_id?: string | null
           completed_at?: string
           feelings?: string | null
           distance?: number | null
@@ -155,6 +184,7 @@ export interface Database {
           id?: string
           itinerary_id?: string
           user_id?: string
+          route_id?: string | null
           completed_at?: string
           feelings?: string | null
           distance?: number | null
@@ -185,6 +215,26 @@ export interface Database {
           user_id?: string
           type?: 'Image' | 'Video'
           url?: string
+          created_at?: string
+        }
+      }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          route_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          route_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          route_id?: string
           created_at?: string
         }
       }

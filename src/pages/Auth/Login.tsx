@@ -15,13 +15,23 @@ export default function Login() {
     setLoading(true)
     setError('')
 
-    const { error } = await authService.signIn(email, password)
-    
-    if (error) {
-      setError(error.message)
+    try {
+      const { error: signInError } = await authService.signIn(email, password)
+      
+      if (signInError) {
+        if (signInError.message === 'Invalid login credentials') {
+          setError('邮箱或密码错误，请重新输入')
+        } else {
+          setError(signInError.message)
+        }
+        setLoading(false)
+      } else {
+        navigate('/')
+      }
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || '登录过程中发生错误')
       setLoading(false)
-    } else {
-      navigate('/')
     }
   }
 

@@ -17,12 +17,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 
 interface CalendarProps {
-  value?: Date
+  value?: Date | null
   onChange?: (date: Date) => void
   className?: string
+  maxDate?: Date
 }
 
-export function Calendar({ value, onChange, className }: CalendarProps) {
+export function Calendar({ value, onChange, className, maxDate }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(value || new Date())
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
@@ -83,25 +84,26 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
           const isSelected = value ? isSameDay(day, value) : false
           const isCurrentMonth = isSameMonth(day, currentMonth)
           const isTodayDate = isToday(day)
+          const isDisabled = !isCurrentMonth || (maxDate && day > maxDate)
 
           return (
             <div key={day.toString()} className="flex justify-center">
               <button
                 onClick={() => handleDateClick(day)}
-                disabled={!isCurrentMonth} // 简约风格通常只让点当月，或者置灰
+                disabled={isDisabled}
                 className={clsx(
                   "w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200",
                   // 选中状态 (绿色主题)
                   isSelected && "bg-emerald-500 text-white shadow-md shadow-emerald-200 font-bold transform scale-105",
                   
-                  // 未选中但悬停 (仅当月)
-                  !isSelected && isCurrentMonth && "hover:bg-emerald-50 hover:text-emerald-600 text-slate-700",
+                  // 未选中但悬停 (仅当月且未禁用)
+                  !isSelected && !isDisabled && "hover:bg-emerald-50 hover:text-emerald-600 text-slate-700",
                   
-                  // 非当月
-                  !isCurrentMonth && "text-slate-200 cursor-default",
+                  // 禁用状态 (非当月或超过最大日期)
+                  isDisabled && "text-slate-200 cursor-not-allowed",
                   
                   // 今天 (未选中时显示小点或特殊颜色)
-                  !isSelected && isTodayDate && isCurrentMonth && "text-emerald-600 font-bold bg-emerald-50/50",
+                  !isSelected && isTodayDate && !isDisabled && "text-emerald-600 font-bold bg-emerald-50/50",
                 )}
               >
                 {format(day, 'd')}

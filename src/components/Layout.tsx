@@ -1,19 +1,136 @@
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Mountain, LogOut, User as UserIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Link, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
+import { Mountain, LogOut, User as UserIcon, Settings, Heart, Share2, CalendarPlus, Map, Calendar, User } from 'lucide-react'
+import { AddToPlanModal } from './AddToPlanModal'
 import clsx from 'clsx'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
+import { supabase } from '../services/supabase'
+import { dataService } from '../services/dataService'
 
 export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { showToast } = useToast()
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [selectedRoute, setSelectedRoute] = useState<any>(null)
+  const [bottomBarMode, setBottomBarMode] = useState<'nav' | 'action'>('nav')
+  const [isLiked, setIsLiked] = useState(false)
+  const [likeLoading, setLikeLoading] = useState(false)
+  const [isAddToPlanModalOpen, setIsAddToPlanModalOpen] = useState(false)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        try {
+          // 尝试从 profiles 表获取角色
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+          
+          if (!error && data) {
+            setIsAdmin((data as any)?.role === 'admin')
+          } else {
+            // 如果 profiles 表不存在或没有 role 列，使用替代方案
+            // 检查 auth 用户的 email 是否是管理员邮箱
+            const adminEmails = ['admin@hiking.com', 'admin@example.com']
+            setIsAdmin(adminEmails.includes(user.email || ''))
+          }
+        } catch (err) {
+          console.error('检查管理员身份失败:', err)
+          // 出错时，默认不显示管理图标
+          setIsAdmin(false)
+        }
+      } else {
+        setIsAdmin(false)
+      }
+    }
+    checkAdmin()
+  }, [user])
+
+  // 监听路由变化，切换底部栏模式
+  useEffect(() => {
+    // 检查是否在路线详情页
+    if (location.pathname.match(/^\/routes\//)) {
+      setBottomBarMode('action')
+    } else {
+      setBottomBarMode('nav')
+    }
+  }, [location.pathname])
+
+  // 处理收藏切换
+  const handleToggleLike = async () => {
+    if (!user || !selectedRoute) return
+    
+    if (likeLoading) return
+    
+    setLikeLoading(true)
+    try {
+      const { isLiked: newIsLiked, error } = await dataService.toggleLike(user.id, selectedRoute.id)
+      
+      if (error) {
+        console.error('Failed to toggle like:', error)
+        showToast('操作失败，请重试', 'error')
+      } else {
+        setIsLiked(newIsLiked || false)
+        showToast(newIsLiked ? '已添加到收藏' : '已取消收藏', 'success')
+      }
+    } catch (err) {
+      console.error('Toggle like error:', err)
+      showToast('操作失败，请重试', 'error')
+    } finally {
+      setLikeLoading(false)
+    }
+  }
+
+  // 处理加入行程按钮点击，显示日历模态框
+  const handleAddToPlan = () => {
+    if (!user) {
+      showToast('请先登录', 'info')
+      navigate('/login')
+      return
+    }
+    if (!selectedRoute) {
+      showToast('未选择路线', 'error')
+      return
+    }
+    
+    setIsAddToPlanModalOpen(true)
+  }
+
+  // 处理日期选择确认
+  const handleAddToPlanConfirm = async (date: Date) => {
+    if (!user || !selectedRoute) return
+    
+    try {
+      // 只传递必填字段和可选的status字段，不传递数据库自动生成的字段
+      const { data, error } = await dataService.createItinerary({
+        user_id: user.id,
+        route_id: selectedRoute.id,
+        planned_date: date.toISOString(),
+        status: 'Pending' as const
+      })
+      
+      if (error) {
+        console.error('Failed to add to plan:', error)
+        showToast('加入行程失败', 'error')
+      } else {
+        showToast('已加入行程', 'success')
+        navigate('/plan')
+      }
+    } catch (error) {
+      console.error('Unexpected error adding to plan:', error)
+      showToast('加入行程失败', 'error')
+    }
+  }
   
   const navItems = [
-    { path: '/', label: '路线推荐', id: 'recommend' },
-    { path: '/plan', label: '行程规划', id: 'plan' },
-    { path: '/profile', label: '个人中心', id: 'profile' },
+    { path: '/', label: '路线推荐', id: 'recommend', icon: Map },
+    { path: '/plan', label: '行程规划', id: 'plan', icon: Calendar },
+    { path: '/profile', label: '个人中心', id: 'profile', icon: User },
   ]
 
   const handleSignOut = async () => {
@@ -25,13 +142,13 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
       {/* 顶部导航栏 */}
-      <nav className="bg-white shadow-sm fixed w-full z-20 top-0">
+      <nav className="bg-white shadow-sm fixed w-full z-20 top-0 pt-safe">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center">
               <Link to="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-                <Mountain className="text-emerald-600 w-8 h-8" />
-                <span className="font-bold text-xl text-slate-800">徒步记录</span>
+                <Mountain className="text-emerald-600 w-7 h-7 sm:w-8 sm:h-8" />
+                <span className="text-lg sm:text-xl font-bold text-slate-900 leading-tight">徒步记</span>
               </Link>
               <div className="hidden sm:ml-10 sm:flex sm:space-x-8">
                 {navItems.map((item) => {
@@ -41,10 +158,10 @@ export default function Layout() {
                       key={item.id}
                       to={item.path}
                       className={clsx(
-                        'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium h-full transition-colors',
+                        'inline-flex items-center px-3 py-2 text-sm font-medium h-full transition-colors rounded-md',
                         isActive
-                          ? 'border-emerald-500 text-slate-900'
-                          : 'border-transparent text-slate-500 hover:border-gray-300 hover:text-gray-700'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                       )}
                     >
                       {item.label}
@@ -53,10 +170,19 @@ export default function Layout() {
                 })}
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               {user ? (
                 <>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {isAdmin && (
+                      <Link 
+                        to="/admin" 
+                        className="text-slate-500 hover:text-emerald-600 p-2 sm:p-2.5 rounded-full hover:bg-slate-100 transition-colors"
+                        title="后台管理"
+                      >
+                        <Settings className="w-5 h-5" />
+                      </Link>
+                    )}
                     <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition">
                       {user.user_metadata.avatar_url ? (
                         <img
@@ -75,7 +201,7 @@ export default function Layout() {
                     </Link>
                     <button 
                       onClick={handleSignOut}
-                      className="text-slate-400 hover:text-slate-600 p-1"
+                      className="text-slate-400 hover:text-slate-600 p-2 sm:p-2.5 rounded-full hover:bg-slate-100 transition-colors"
                       title="退出登录"
                     >
                       <LogOut className="w-5 h-5" />
@@ -83,8 +209,8 @@ export default function Layout() {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center gap-3">
-                  <Link to="/login" className="text-sm font-medium text-slate-500 hover:text-slate-900">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md hover:bg-slate-50 transition">
                     登录
                   </Link>
                   <Link to="/register" className="text-sm font-medium bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition">
@@ -97,9 +223,71 @@ export default function Layout() {
         </div>
       </nav>
 
+      {/* 加入行程模态框 */}
+      <AddToPlanModal
+        isOpen={isAddToPlanModalOpen}
+        onClose={() => setIsAddToPlanModalOpen(false)}
+        onConfirm={handleAddToPlanConfirm}
+        routeName={selectedRoute?.name || ''}
+      />
+      
       {/* 主体内容容器 */}
-      <div className="pt-16 min-h-screen flex flex-col relative">
-        <Outlet />
+      <div className="pt-16 pb-28 min-h-screen flex flex-col relative">
+        <Outlet context={{ setSelectedRoute, setIsLiked }} />
+      </div>
+
+      {/* 动态切换底部栏 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 z-20 shadow-sm transition-all duration-300 ease-in-out pb-safe-b">
+        {bottomBarMode === 'nav' ? (
+          <nav className="animate-slide-up">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-around h-20 items-center">
+                {navItems.map((item) => {
+                  const isActive = location.pathname === item.path
+                  const Icon = item.icon
+                  return (
+                    <Link
+                      key={item.id}
+                      to={item.path}
+                      className={clsx(
+                        'flex flex-col items-center justify-center h-full flex-1 gap-1 transition-all duration-300 px-4',
+                        isActive
+                          ? 'text-emerald-600'
+                          : 'text-slate-500 hover:text-emerald-500'
+                      )}
+                    >
+                      <Icon className="w-6 h-6" />
+                      <span className="text-xs font-medium">{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </nav>
+        ) : (
+          <div className="py-4 px-8 flex items-center justify-between gap-6 animate-slide-up">
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={handleToggleLike}
+                disabled={likeLoading}
+                className={`p-3 rounded-full transition-all active:scale-90 ${isLiked ? 'text-rose-500 bg-rose-50 hover:text-rose-600 hover:bg-rose-100' : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'}`}
+                title={isLiked ? "取消收藏" : "收藏路线"}
+              >
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+              </button>
+              <button className="p-3 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors">
+                  <Share2 className="w-5 h-5" />
+              </button>
+            </div>
+            <button 
+                onClick={handleAddToPlan}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium text-sm shadow-sm shadow-emerald-200 flex items-center gap-2 transition-transform active:scale-95"
+            >
+                <CalendarPlus className="w-5 h-5" /> 
+                加入行程
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

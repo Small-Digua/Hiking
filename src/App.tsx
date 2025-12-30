@@ -10,6 +10,14 @@ import Register from './pages/Auth/Register'
 import ForgotPassword from './pages/Auth/ForgotPassword'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
+
+// Admin Pages
+import AdminLayout from './pages/Admin/AdminLayout'
+import Dashboard from './pages/Admin/Dashboard'
+import UserManagement from './pages/Admin/Users'
+import RouteManagement from './pages/Admin/Routes'
+import CityManagement from './pages/Admin/Cities'
+
 const NotFound = () => <div className="p-8 text-center">404 - 页面未找到</div>
 
 // 路由守卫组件
@@ -30,34 +38,42 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="routes/:id" element={<RouteDetail />} />
-          
-          {/* 受保护的路由 */}
-          <Route path="plan" element={
-            <ProtectedRoute>
-              <Plan />
-            </ProtectedRoute>
-          } />
-          <Route path="record" element={
-            <ProtectedRoute>
-              <Record />
-            </ProtectedRoute>
-          } />
-          <Route path="profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="routes/:id" element={<RouteDetail />} />
+            
+            {/* 受保护的路由 */}
+            <Route path="plan" element={
+              <ProtectedRoute>
+                <Plan />
+              </ProtectedRoute>
+            } />
+            <Route path="record" element={
+              <ProtectedRoute>
+                <Record />
+              </ProtectedRoute>
+            } />
+            <Route path="profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="routes" element={<RouteManagement />} />
+            <Route path="cities" element={<CityManagement />} />
+          </Route>
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
-        </Route>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-      </Routes>
+        </Routes>
     </AuthProvider>
   )
 }

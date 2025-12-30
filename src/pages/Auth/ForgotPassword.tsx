@@ -122,7 +122,7 @@ export default function ForgotPassword() {
         <div className="flex justify-center mb-6">
           <Link to="/" className="flex items-center gap-2">
             <Mountain className="w-10 h-10 text-emerald-600" />
-            <span className="font-bold text-xl text-slate-800">徒步记录</span>
+            <span className="text-xl font-bold text-slate-900 leading-tight">徒步记</span>
           </Link>
         </div>
         

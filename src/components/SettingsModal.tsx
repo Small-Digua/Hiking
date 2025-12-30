@@ -12,18 +12,20 @@ interface SettingsModalProps {
 }
 
 const AVATARS = [
+  '/avatars/avatar_custom_01.png',
+  '/avatars/avatar_custom_02.png',
+  '/avatars/avatar_custom_03.png',
+  '/avatars/avatar_custom_04.png',
+  '/avatars/avatar_custom_05.png',
+  '/avatars/avatar_custom_06.png',
+  '/avatars/avatar_custom_07.png',
   '/avatars/avatar_01.png',
   '/avatars/avatar_02.png',
   '/avatars/avatar_03.png',
   '/avatars/avatar_04.png',
   '/avatars/avatar_05.png',
   '/avatars/avatar_06.png',
-  '/avatars/avatar_07.png',
-  '/avatars/avatar_08.png',
-  '/avatars/avatar_09.png',
-  '/avatars/avatar_10.png',
-  '/avatars/avatar_11.png',
-  '/avatars/avatar_12.png'
+  '/avatars/avatar_07.png'
 ]
 
 const SECURITY_QUESTIONS = [
@@ -45,6 +47,8 @@ export function SettingsModal({ isOpen, onClose, onUpdateUser }: SettingsModalPr
   const [username, setUsername] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState('')
 
+
+
   // Security States
   const [securityQuestion, setSecurityQuestion] = useState(SECURITY_QUESTIONS[0])
   const [securityAnswer, setSecurityAnswer] = useState('')
@@ -62,6 +66,8 @@ export function SettingsModal({ isOpen, onClose, onUpdateUser }: SettingsModalPr
       document.body.style.overflow = 'unset'
     }
   }, [isOpen, user])
+
+
 
   const handleSaveProfile = async () => {
     if (!user) return

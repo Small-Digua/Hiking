@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { zhCN } from 'date-fns/locale'
 import { format } from 'date-fns'
-import { X, Upload, Calendar as CalendarIcon, Loader2, Share2, Video, FileVideo, AlertCircle, Clock, Route } from 'lucide-react'
+import { X, Upload, Calendar as CalendarIcon, Loader2, Share2, Video, FileVideo, AlertCircle } from 'lucide-react'
 import clsx from 'clsx'
 import { Calendar } from './ui/Calendar'
+import { DurationInput } from './ui/DurationInput'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -22,8 +23,8 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
   const [step, setStep] = useState<'form' | 'success'>('form')
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [feelings, setFeelings] = useState('')
-  const [distance, setDistance] = useState<string>('')
-  const [duration, setDuration] = useState<string>('00:00')
+  const [distance, setDistance] = useState<string>('0.0')
+  const [duration, setDuration] = useState<string>('')
   const [mediaFiles, setMediaFiles] = useState<FileWithPreview[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -37,8 +38,8 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
       setStep('form')
       setDate(new Date())
       setFeelings('')
-      setDistance('')
-      setDuration('00:00')
+      setDistance('0.0')
+      setDuration('')
       setMediaFiles([])
       setErrorMsg(null)
       setIsSubmitting(false)
@@ -89,12 +90,16 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
     if (newMediaFiles.length > 0) {
       setMediaFiles(prev => {
         const combined = [...prev, ...newMediaFiles]
+        const result = combined.length > 9 ? combined.slice(0, 9) : combined
+        
+        // 清理超过9个限制的文件的预览URL
         if (combined.length > 9) {
-          setErrorMsg('最多只能上传9个文件')
-          // 只取前9个
-          return combined.slice(0, 9)
+          for (let i = 9; i < combined.length; i++) {
+            URL.revokeObjectURL(combined[i].preview)
+          }
         }
-        return combined
+        
+        return result
       })
     }
   }
@@ -103,10 +108,8 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
     if (e.target.files) {
       handleFiles(Array.from(e.target.files))
     }
-    // 重置 input 以允许重复选择同一文件
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+    // 不立即重置input，确保文件对象在上传前保持有效
+    // 重置操作将在提交成功后进行
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -146,13 +149,14 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
         return
     }
 
-    // 验证时长 (浏览器的时间输入框会自动验证格式，但这里额外做个正则保险)
-    if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(duration)) {
-        setErrorMsg('请输入有效的徒步时长 (HH:mm)')
+    // 验证时长
+    if (!duration || duration.trim() === '') {
+        setErrorMsg('请输入徒步时长')
         return
     }
 
     setIsSubmitting(true)
+    setErrorMsg(null)
     try {
       // 转换回原始 File 数组传给父组件
       await onConfirm({ 
@@ -163,31 +167,35 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
         duration
       })
       setStep('success')
+      
+      // 提交成功后重置input，允许重复选择同一文件
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     } catch (error) {
       console.error(error)
+      // 显示错误信息
+      setErrorMsg(error instanceof Error ? error.message : '打卡失败，请重试')
     } finally {
       setIsSubmitting(false)
     }
   }
   
   const formatDurationText = (dur: string) => {
-    const [hours, minutes] = dur.split(':').map(Number)
-    if (hours === 0 && minutes === 0) return '0分钟'
-    let text = ''
-    if (hours > 0) text += `${hours}小时`
-    if (minutes > 0) text += `${minutes}分钟`
-    return text
+    if (!dur || dur.trim() === '') return '0分钟'
+    return dur // 直接返回，因为DurationInput已经格式化为"X小时X分钟"
   }
 
   const renderForm = () => (
-    <div className="p-6 space-y-6">
+    <div className="p-5 space-y-5">
       {/* 日期选择 */}
       <div className="space-y-2">
         <label className="block text-sm font-bold text-slate-700">打卡日期 <span className="text-red-500">*</span></label>
         <div className="relative">
           <button 
             onClick={() => setShowCalendar(!showCalendar)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 hover:border-emerald-500 hover:bg-white transition-all"
+            className="w-full flex items-center justify-between px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 hover:border-emerald-500 hover:bg-white transition-all"
+            aria-label="选择打卡日期"
           >
             <span className="flex items-center gap-2">
                 <CalendarIcon className="w-5 h-5 text-emerald-600" />
@@ -197,10 +205,11 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
           </button>
           
           {showCalendar && (
-            <div className="absolute top-full left-0 mt-2 z-10 bg-white border border-slate-100 rounded-2xl shadow-xl animate-zoom-in p-4">
+            <div className="absolute top-full left-0 right-0 mt-2 z-10 bg-white border border-slate-100 rounded-2xl shadow-xl animate-zoom-in p-2 overflow-hidden max-w-full">
                <Calendar
                   value={date}
                   onChange={(d) => { setDate(d); setShowCalendar(false); }}
+                  className="max-w-full"
                 />
             </div>
           )}
@@ -210,46 +219,31 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
       {/* 徒步记录模块 */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-            <label className="block text-sm font-bold text-slate-700">徒步路程 (km) <span className="text-red-500">*</span></label>
-            <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Route className="h-5 w-5 text-emerald-500" />
-                </div>
+            <label className="block text-sm font-bold text-slate-700">徒步路程 <span className="text-red-500">*</span></label>
+            <div className="flex items-center space-x-1">
                 <input
                     type="number"
                     step="0.1"
                     min="0.1"
                     max="100"
-                    value={distance}
+                    value={distance || undefined}
                     onChange={(e) => setDistance(e.target.value)}
                     placeholder="0.0"
-                    className="pl-10 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                    className="w-[120px] px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all placeholder-black placeholder-opacity-0"
                 />
+                <span className="text-sm text-slate-600 whitespace-nowrap">km</span>
             </div>
         </div>
         <div className="space-y-2">
             <label className="block text-sm font-bold text-slate-700">徒步时长 <span className="text-red-500">*</span></label>
-            <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Clock className="h-5 w-5 text-emerald-500" />
-                </div>
-                <input
-                    type="time"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    className="pl-10 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                />
-            </div>
+            <DurationInput
+              value={duration}
+              onChange={setDuration}
+            />
         </div>
       </div>
       
-      {/* 预览提示 */}
-      {(distance && duration !== '00:00') && (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-sm text-emerald-800 flex items-center gap-2 animate-fade-in">
-              <span className="font-bold">预览：</span>
-              徒步 {distance} 公里，耗时 {formatDurationText(duration)}
-          </div>
-      )}
+
 
       {/* 媒体文件上传 */}
       <div className="space-y-2">
@@ -263,7 +257,7 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
         {/* 拖拽区域 */}
         <div 
           className={clsx(
-            "relative border-2 border-dashed rounded-xl transition-all duration-200 min-h-[120px]",
+            "relative border-2 border-dashed rounded-xl transition-all duration-200 min-h-[140px]",
             dragActive ? "border-emerald-500 bg-emerald-50" : "border-slate-300 bg-slate-50",
             mediaFiles.length === 0 && "flex flex-col items-center justify-center py-8"
           )}
@@ -271,9 +265,13 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
+          aria-label="点击或拖拽上传现场照片/视频"
         >
           {mediaFiles.length === 0 ? (
-            <div className="text-center cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div 
+              className="text-center cursor-pointer" 
+              onClick={() => fileInputRef.current?.click()}
+            >
                <div className="bg-white p-3 rounded-full shadow-sm inline-block mb-3">
                   <Upload className="w-6 h-6 text-emerald-500" />
                </div>
@@ -283,7 +281,11 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
           ) : (
             <div className="p-3 grid grid-cols-3 gap-3">
                {mediaFiles.map((item, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 group bg-black">
+                  <div 
+                    key={idx} 
+                    className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 group bg-black"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                       {item.type === 'video' ? (
                         <video src={item.preview} className="w-full h-full object-cover opacity-80" />
                       ) : (
@@ -299,17 +301,24 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
                       )}
 
                       <button 
-                          onClick={() => removeFile(idx)}
-                          className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(idx);
+                          }}
+                          className="absolute top-1 right-1 bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                          aria-label="删除媒体文件"
                       >
-                          <X className="w-3 h-3" />
+                          <X className="w-4 h-4" />
                       </button>
                   </div>
                ))}
                
                {mediaFiles.length < 9 && (
                   <button 
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
                       className="aspect-square flex flex-col items-center justify-center bg-white border border-dashed border-slate-300 rounded-lg hover:border-emerald-400 hover:bg-emerald-50 transition-colors"
                   >
                       <Upload className="w-5 h-5 text-emerald-500 mb-1" />
@@ -321,8 +330,8 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
 
           {/* 错误提示 */}
           {errorMsg && (
-             <div className="absolute -bottom-8 left-0 right-0 flex items-center gap-1.5 text-xs text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 animate-fade-in">
-                <AlertCircle className="w-3 h-3" />
+             <div className="mt-2 flex items-center gap-1.5 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg border border-red-100 animate-fade-in">
+                <AlertCircle className="w-4 h-4" />
                 {errorMsg}
              </div>
           )}
@@ -350,7 +359,7 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
             maxLength={500}
             rows={4}
             placeholder="分享一下这次徒步的感受吧..."
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all resize-none"
+            className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all resize-none"
         />
       </div>
 
@@ -432,17 +441,17 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-20 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center p-2 pt-10 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-[90vw] sm:max-w-md overflow-hidden transform animate-zoom-in relative my-auto"
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-full sm:max-w-md overflow-hidden transform animate-zoom-in relative mt-2 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {step === 'form' && (
-            <div className="flex justify-between items-center p-6 pb-0">
+            <div className="flex justify-between items-center p-5 pb-0">
                 <h3 className="text-xl font-bold text-slate-800">徒步打卡</h3>
-                <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X className="w-6 h-6" /></button>
+                <button onClick={onClose} className="text-slate-400 hover:text-slate-600" aria-label="关闭模态框"><X className="w-6 h-6" /></button>
             </div>
         )}
         

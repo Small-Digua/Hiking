@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, Search, Loader2, MapPin, Clock } from 'lucide-react'
 import { dataService } from '../services/dataService'
 import type { Database } from '../types/database.types'
-import { DifficultyStars } from './DifficultyStars'
+
 
 type Route = Database['public']['Tables']['routes']['Row']
 
@@ -117,7 +117,7 @@ export function SelectRouteModal({ isOpen, onClose, onSelect }: SelectRouteModal
                       {route.name}
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
-                      <DifficultyStars level={route.difficulty} className="scale-90 origin-left" />
+
                     </div>
                   </div>
                   

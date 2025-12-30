@@ -13,7 +13,6 @@ export interface ToastProps {
 interface ToastComponentProps {
   message: string;
   type: ToastType;
-  onClose: () => void;
 }
 
 export function Toast({ message, type }: ToastComponentProps) {
@@ -60,9 +59,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-3 pointer-events-none items-center">
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] flex flex-col gap-3 pointer-events-none items-center">
         {toasts.map((toast) => (
-           <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => {}} />
+           <Toast key={toast.id} message={toast.message} type={toast.type} />
         ))}
       </div>
     </ToastContext.Provider>

@@ -26,7 +26,7 @@ export default function Register() {
     } else {
       // 注册成功，通常 Supabase 默认需要邮箱验证，或者直接登录
       // 这里简单处理为跳转登录页提示
-      showToast('注册成功！请检查邮箱进行验证，或直接登录。', 'success')
+      showToast('注册成功！请用邮箱登录。', 'success')
       navigate('/login')
     }
   }

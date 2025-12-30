@@ -28,6 +28,27 @@ export const dataService = {
   },
 
   // Routes
+  async getRoutes(filters?: { status?: string; city_id?: string; limit?: number }) {
+    let query = supabase
+      .from('routes')
+      .select('*, cities(name)')
+    
+    if (filters?.status) {
+      query = query.eq('status', filters.status)
+    }
+    
+    if (filters?.city_id) {
+      query = query.eq('city_id', filters.city_id)
+    }
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit)
+    }
+    
+    const { data, error } = await query
+    return { data, error }
+  },
+
   async getAllRoutes(limit = 10) {
     const { data, error } = await supabase
       .from('routes')
@@ -68,6 +89,7 @@ export const dataService = {
         routes (*)
       `)
       .eq('user_id', userId)
+      .is('deleted_at', null) // Filter out soft-deleted items
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { data, error } as { data: (Itinerary & { routes: Route | null })[] | null; error: any }
   },
@@ -93,6 +115,25 @@ export const dataService = {
     return { data, error } as { data: Itinerary | null; error: any } // eslint-disable-line @typescript-eslint/no-explicit-any
   },
 
+  async deleteItinerary(id: string) {
+    try {
+      const { error } = await (supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('itineraries') as any)
+        .delete()
+        .eq('id', id)
+      
+      if (error) {
+        console.error('Failed to delete itinerary:', error);
+      }
+      
+      return { error }
+    } catch (error) {
+      console.error('Unexpected error in deleteItinerary:', error);
+      return { error };
+    }
+  },
+
   // Hiking Records
   async getUserHikingRecords(userId: string) {
     const { data, error } = await supabase
@@ -100,6 +141,7 @@ export const dataService = {
       .select(`
         *,
         media (*),
+        routes (*),
         itineraries (
           routes (*)
         )
@@ -113,7 +155,8 @@ export const dataService = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformedData = data.map((record: any) => ({
       ...record,
-      routes: record.itineraries?.routes || null
+      // 优先使用直接关联的路线信息，如果没有则使用通过行程关联的路线信息
+      routes: record.routes || record.itineraries?.routes || null
     }))
 
     return { data: transformedData, error: null }
@@ -135,6 +178,129 @@ export const dataService = {
         .from('media') as any)
         .insert(media)
     return { data, error }
+  },
+
+  async getRecords() {
+    const { data, error } = await supabase
+      .from('hiking_records')
+      .select(`
+        *,
+        routes(*, cities(*)),
+        itinerary:itineraries(*, route:routes(*, city:cities(*))),
+        media(*)
+      `)
+      .order('completed_at', { ascending: false });
+
+    if (error) throw error;
+    
+    // Transform data to ensure route information is available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transformedData = data?.map((record: any) => ({
+      ...record,
+      // 优先使用直接关联的路线信息，如果没有则使用通过行程关联的路线信息
+      route: record.routes || record.itinerary?.route || null
+    })) || [];
+    
+    return transformedData;
+  },
+
+  async uploadImage(file: File, path: string): Promise<string> {
+    const { data, error } = await supabase.storage
+      .from('hiking_assets')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('hiking_assets')
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  },
+
+  async deleteImage(path: string): Promise<void> {
+    const { error } = await supabase.storage
+      .from('hiking_assets')
+      .remove([path]);
+
+    if (error) throw error;
+  },
+
+  async deleteMediaByRecordId(recordId: string): Promise<{ success: boolean; error?: any }> {
+    try {
+      const { error } = await (supabase
+        .from('media') as any)
+        .delete()
+        .eq('record_id', recordId);
+
+      if (error) {
+        console.error('Failed to delete media by record id:', error);
+        throw new Error(`删除媒体记录失败: ${error.message}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Unexpected error in deleteMediaByRecordId:', error);
+      return { success: false, error };
+    }
+  },
+
+  async deleteHikingRecord(recordId: string): Promise<{ success: boolean; error?: any }> {
+    try {
+      // 1. 首先获取徒步记录，以便获取关联的行程ID
+      const { data: record, error: getError } = await (supabase
+        .from('hiking_records') as any)
+        .select('id, itinerary_id')
+        .eq('id', recordId)
+        .single();
+
+      if (getError || !record) {
+        console.error('Failed to get hiking record:', getError);
+        throw new Error(`获取徒步记录失败: ${getError?.message || '记录不存在'}`);
+      }
+
+      // 2. 删除徒步记录
+      const { error: deleteRecordError } = await (supabase
+        .from('hiking_records') as any)
+        .delete()
+        .eq('id', recordId);
+
+      if (deleteRecordError) {
+        console.error('Failed to delete hiking record:', deleteRecordError);
+        throw new Error(`删除徒步记录失败: ${deleteRecordError.message}`);
+      }
+
+      // 3. 检查该行程是否还有其他徒步记录
+      const { data: otherRecords, error: checkError } = await (supabase
+        .from('hiking_records') as any)
+        .select('id')
+        .eq('itinerary_id', record.itinerary_id)
+        .limit(1);
+
+      if (checkError) {
+        console.error('Failed to check other records:', checkError);
+        // 继续执行，不中断流程
+      } else if (!otherRecords || otherRecords.length === 0) {
+        // 4. 如果没有其他徒步记录，将行程标记为已删除
+        const { error: updateItineraryError } = await (supabase
+          .from('itineraries') as any)
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', record.itinerary_id);
+
+        if (updateItineraryError) {
+          console.error('Failed to update itinerary deleted_at:', updateItineraryError);
+          // 不抛出错误，因为主要的删除操作已经成功
+        }
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Unexpected error in deleteHikingRecord:', error);
+      return { success: false, error };
+    }
   },
 
   // User Stats
@@ -206,5 +372,88 @@ export const dataService = {
       }
     })
     return { data, error }
+  },
+
+  // Favorites
+  async checkIsLiked(userId: string, routeId: string) {
+    const { data, error } = await (supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('favorites') as any)
+      .select('id')
+      .eq('user_id', userId)
+      .eq('route_id', routeId)
+      .maybeSingle()
+    
+    return { isLiked: !!data, error }
+  },
+
+  async toggleLike(userId: string, routeId: string) {
+    // Check if already liked
+    const { isLiked, error: checkError } = await this.checkIsLiked(userId, routeId)
+    if (checkError) return { error: checkError }
+
+    if (isLiked) {
+      // Unlike (Delete)
+      const { error } = await (supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('favorites') as any)
+        .delete()
+        .eq('user_id', userId)
+        .eq('route_id', routeId)
+      return { isLiked: false, error }
+    } else {
+      // Like (Insert)
+      const { error } = await (supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('favorites') as any)
+        .insert({ user_id: userId, route_id: routeId })
+      return { isLiked: true, error }
+    }
+  },
+
+  async getUserFavorites(userId: string) {
+    try {
+      // 1. 先查询用户的收藏记录
+      const { data: favorites, error: favError } = await supabase
+        .from('favorites')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (favError) {
+        return { data: null, error: favError }
+      }
+
+      if (!favorites || favorites.length === 0) {
+        return { data: [], error: null }
+      }
+
+      // 2. 查询对应的路线信息
+      const routeIds = favorites.map((f: any) => f.route_id)
+      const { data: routes, error: routesError } = await supabase
+        .from('routes')
+        .select(`
+          *,
+          cities (name)
+        `)
+        .in('id', routeIds)
+
+      if (routesError) {
+        return { data: null, error: routesError }
+      }
+
+      // 3. 组合数据并过滤掉无效路线
+      const combinedData = favorites.map((fav: any) => ({
+        ...fav,
+        routes: routes?.find((r: any) => r.id === fav.route_id) || null
+      }))
+      
+      // 过滤掉没有对应路线的收藏记录
+      const validFavorites = combinedData.filter(fav => fav.routes !== null)
+
+      return { data: validFavorites, error: null }
+    } catch (error) {
+      return { data: null, error }
+    }
   }
 }

@@ -47,11 +47,11 @@ export function AddToPlanModal({ isOpen, onClose, onConfirm, routeName }: AddToP
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-20 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
       onClick={onClose} // 点击遮罩关闭
     >
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-[90vw] sm:max-w-sm overflow-hidden transform animate-zoom-in relative my-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-[90vw] sm:max-w-sm overflow-hidden transform animate-zoom-in relative"
         onClick={(e) => e.stopPropagation()} // 阻止冒泡
       >
         {/* Header */}
