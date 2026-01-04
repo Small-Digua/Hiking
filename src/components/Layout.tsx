@@ -5,7 +5,7 @@ import { AddToPlanModal } from './AddToPlanModal'
 import clsx from 'clsx'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
-
+import { supabase } from '../services/supabase'
 import { dataService } from '../services/dataService'
 
 export default function Layout() {
@@ -24,10 +24,20 @@ export default function Layout() {
     const checkAdmin = async () => {
       if (user) {
         try {
-          // 直接使用替代方案检查管理员身份
-          // 检查 auth 用户的 email 是否是管理员邮箱
-          const adminEmails = ['admin@hiking.com', 'admin@example.com']
-          setIsAdmin(adminEmails.includes(user.email || ''))
+          // 从数据库查询用户角色信息
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          
+          if (error) {
+            console.error('检查管理员身份失败:', error)
+            setIsAdmin(false)
+          } else {
+            // 如果数据库中角色为admin，或者邮箱是764855102@qq.com，都设置为管理员
+            setIsAdmin((data as any)?.role === 'admin' || user.email === '764855102@qq.com')
+          }
         } catch (err) {
           console.error('检查管理员身份失败:', err)
           // 出错时，默认不显示管理图标
