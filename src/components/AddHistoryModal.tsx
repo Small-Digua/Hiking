@@ -374,7 +374,7 @@ export function AddHistoryModal({ isOpen, onClose, onSuccess }: AddHistoryModalP
                   <select
                     value={formData.route_id}
                     onChange={e => setFormData(prev => ({ ...prev, route_id: e.target.value }))}
-                    className="w-full appearance-none px-4 py-3 bg-white border-2 border-emerald-500 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white focus:border-emerald-600 transition-all pr-10 cursor-pointer"
+                    className="w-full appearance-none px-4 py-3 bg-white border-2 border-emerald-500 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white focus:border-emerald-600 transition-all pr-10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!formData.city_id}
                     required
                   >
@@ -438,10 +438,11 @@ export function AddHistoryModal({ isOpen, onClose, onSuccess }: AddHistoryModalP
                             step="0.1"
                             min="0.1"
                             max="100"
-                            value={distance}
+                            value={distance || '0'}
                             onChange={(e) => setDistance(e.target.value)}
+                            onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }}
                             placeholder="0.0"
-                            className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                            className="flex-1 px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-black font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all placeholder-black placeholder-opacity-0"
                         />
                         <span className="text-sm text-slate-600">km</span>
                     </div>

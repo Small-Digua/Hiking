@@ -86,7 +86,7 @@ export default function CityManagement() {
            <select
              value={filters.district}
              onChange={e => setFilters({...filters, district: e.target.value, page: 1})}
-             className="px-3 py-2 border rounded-md"
+             className="px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
            >
              <option value="">所有区域</option>
              {districts.map(district => (

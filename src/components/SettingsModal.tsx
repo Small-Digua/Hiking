@@ -271,7 +271,7 @@ export function SettingsModal({ isOpen, onClose, onUpdateUser }: SettingsModalPr
                   <select
                     value={securityQuestion}
                     onChange={(e) => setSecurityQuestion(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-white"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                   >
                     {SECURITY_QUESTIONS.map(q => (
                       <option key={q} value={q}>{q}</option>

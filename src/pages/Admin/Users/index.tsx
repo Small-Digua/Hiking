@@ -84,7 +84,7 @@ export default function UserManagement() {
            <select
              value={filters.role}
              onChange={e => setFilters({...filters, role: e.target.value, page: 1})}
-             className="px-3 py-2 border rounded-md"
+             className="px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
            >
              <option value="">所有角色</option>
              <option value="user">普通用户</option>
@@ -93,7 +93,7 @@ export default function UserManagement() {
            <select
              value={filters.status}
              onChange={e => setFilters({...filters, status: e.target.value, page: 1})}
-             className="px-3 py-2 border rounded-md"
+             className="px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
            >
              <option value="">所有状态</option>
              <option value="active">启用</option>

@@ -114,7 +114,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user }: UserModal
               <select
                 value={formData.role}
                 onChange={e => setFormData({...formData, role: e.target.value})}
-                className="w-full px-3 py-2 border rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
               >
                 <option value="user">普通用户</option>
                 <option value="admin">管理员</option>
@@ -125,7 +125,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user }: UserModal
               <select
                 value={formData.status}
                 onChange={e => setFormData({...formData, status: e.target.value})}
-                className="w-full px-3 py-2 border rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
               >
                 <option value="active">启用</option>
                 <option value="disabled">禁用</option>

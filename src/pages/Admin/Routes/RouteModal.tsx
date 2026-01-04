@@ -180,7 +180,7 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
                   <select
                     value={formData.city_id}
                     onChange={e => setFormData({...formData, city_id: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                     required
                   >
                     <option value="">请选择城市</option>

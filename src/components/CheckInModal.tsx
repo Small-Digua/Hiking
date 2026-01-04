@@ -222,10 +222,11 @@ export function CheckInModal({ isOpen, onClose, onConfirm, routeName }: CheckInM
                     step="0.1"
                     min="0.1"
                     max="100"
-                    value={distance || undefined}
+                    value={distance || '0'}
                     onChange={(e) => setDistance(e.target.value)}
+                    onFocus={(e) => { if (e.target.value === '0') e.target.value = ''; }}
                     placeholder="0.0"
-                    className="w-[120px] px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all placeholder-black placeholder-opacity-0"
+                    className="w-[120px] px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-black font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all placeholder-black placeholder-opacity-0"
                 />
                 <span className="text-sm text-slate-600 whitespace-nowrap">km</span>
             </div>

@@ -93,7 +93,7 @@ export default function RouteManagement() {
            <select
              value={filters.city_id}
              onChange={e => setFilters({...filters, city_id: e.target.value, page: 1})}
-             className="px-3 py-2 border rounded-md"
+             className="px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
            >
              <option value="">所有城市</option>
              {cities.map(city => (
@@ -103,7 +103,7 @@ export default function RouteManagement() {
            <select
              value={filters.status}
              onChange={e => setFilters({...filters, status: e.target.value, page: 1})}
-             className="px-3 py-2 border rounded-md"
+             className="px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
            >
              <option value="">所有状态</option>
              <option value="active">上架</option>
@@ -112,7 +112,7 @@ export default function RouteManagement() {
            <select
              value={filters.difficulty}
              onChange={e => setFilters({...filters, difficulty: e.target.value, page: 1})}
-             className="px-3 py-2 border rounded-md"
+             className="px-3 py-2 border border-slate-200 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
            >
              <option value="">所有难度</option>
              <option value="1">1</option>

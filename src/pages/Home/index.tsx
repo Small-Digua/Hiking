@@ -199,7 +199,7 @@ export default function Home() {
               {/* 自定义带有动画效果的下拉组件 */}
               <div ref={cityDropdownRef} className="relative z-10">
                 <button
-                  className="w-full flex items-center justify-between px-4 py-3 bg-white border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all cursor-pointer"
+                  className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-emerald-500 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white focus:border-emerald-600 transition-all cursor-pointer"
                   onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
                   aria-expanded={isCityDropdownOpen}
                 >

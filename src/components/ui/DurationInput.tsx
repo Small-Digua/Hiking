@@ -108,7 +108,7 @@ export function DurationInput({ value, onChange, className }: DurationInputProps
             onChange={handleHoursChange}
             onFocus={handleHoursFocus}
             onBlur={handleHoursBlur}
-            className="w-12 px-3 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-center placeholder-black placeholder-opacity-0"
+            className="w-12 px-3 py-4 bg-slate-50 border border-slate-200 rounded-xl text-black font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-center placeholder-black placeholder-opacity-0"
           />
           <span className="text-sm text-slate-600 whitespace-nowrap">小时</span>
         </div>
@@ -123,7 +123,7 @@ export function DurationInput({ value, onChange, className }: DurationInputProps
             onChange={handleMinutesChange}
             onFocus={handleMinutesFocus}
             onBlur={handleMinutesBlur}
-            className="w-12 px-3 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-center placeholder-black placeholder-opacity-0"
+            className="w-12 px-3 py-4 bg-slate-50 border border-slate-200 rounded-xl text-black font-sans text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all text-center placeholder-black placeholder-opacity-0"
           />
           <span className="text-sm text-slate-600 whitespace-nowrap">分钟</span>
         </div>
