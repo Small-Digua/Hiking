@@ -18,6 +18,7 @@ import Dashboard from './pages/Admin/Dashboard'
 import UserManagement from './pages/Admin/Users'
 import RouteManagement from './pages/Admin/Routes'
 import CityManagement from './pages/Admin/Cities'
+import TagManagement from './pages/Admin/Tags'
 
 const NotFound = () => <div className="p-8 text-center">404 - 页面未找到</div>
 
@@ -73,6 +74,7 @@ function App() {
             <Route path="users" element={<UserManagement />} />
             <Route path="routes" element={<RouteManagement />} />
             <Route path="cities" element={<CityManagement />} />
+            <Route path="tags" element={<TagManagement />} />
           </Route>
 
           <Route path="/login" element={<Login />} />

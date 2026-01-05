@@ -5,6 +5,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { supabase } from '../../../services/supabase';
 import ImageUpload from '../../../components/ui/ImageUpload';
 import RatingInput from '../../../components/ui/RatingInput';
+import { adminApi } from '../../../services/admin/api';
 
 interface RouteModalProps {
   isOpen: boolean;
@@ -24,15 +25,17 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
     start_point: '',
     end_point: '',
     waypoints: '',
-    tags: '',
+    tags: [] as string[],
     description: '',
     cover_image_url: '',
     images: [] as string[]
   });
   const [cities, setCities] = useState<any[]>([]);
+  const [allTags, setAllTags] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [tagsLoaded, setTagsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -41,6 +44,22 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
     };
     fetchCities();
   }, []);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tags = await adminApi.getAllTags();
+        setAllTags(tags);
+      } catch (err) {
+        console.error('Failed to fetch tags:', err);
+      } finally {
+        setTagsLoaded(true);
+      }
+    };
+    if (isOpen) {
+      fetchTags();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (route && isOpen) {
@@ -58,7 +77,7 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
         start_point: route.start_point || '',
         end_point: route.end_point || '',
         waypoints: route.waypoints || '',
-        tags: Array.isArray(route.tags) ? route.tags.join(', ') : (route.tags || ''),
+        tags: Array.isArray(route.tags) ? route.tags : [],
         description: route.description || '',
         cover_image_url: route.cover_image_url || '',
         images: route.images || (route.cover_image_url ? [route.cover_image_url] : [])
@@ -75,7 +94,7 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
         start_point: '',
         end_point: '',
         waypoints: '',
-        tags: '',
+        tags: [],
         description: '',
         cover_image_url: '',
         images: []
@@ -93,7 +112,6 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
     
     const submitData = {
       ...formData,
-      tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
       difficulty: Number(formData.difficulty),
       duration_hours: Number(formData.duration_hours),
       distance_km: Number(formData.distance_km),
@@ -111,12 +129,29 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
     }
   };
 
+  const handleTagChange = (tagId: string) => {
+    setFormData(prev => {
+      if (prev.tags.includes(tagId)) {
+        return {
+          ...prev,
+          tags: prev.tags.filter(id => id !== tagId)
+        };
+      } else {
+        return {
+          ...prev,
+          tags: [...prev.tags, tagId]
+        };
+      }
+    });
+  };
+
   // Quill formats and modules
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, false] }],
       ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [{'list': 'ordered'}, {'list': 'bullet'}], // Remove indentation for now if problematic, or keep if formats are fixed
+      [{ 'align': ['', 'center', 'right', 'justify'] }],
       ['link', 'image'],
       ['clean']
     ],
@@ -126,6 +161,7 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
     'header',
     'bold', 'italic', 'underline', 'strike', 'blockquote',
     'list', 'bullet', // 'indent' is usually not needed in formats unless explicitly used in toolbar
+    'align',
     'link', 'image'
   ];
 
@@ -230,14 +266,35 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
 
                 <div className="grid grid-cols-2 gap-4">
                    <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">标签 (逗号分隔)</label>
-                    <input
-                      type="text"
-                      value={formData.tags}
-                      onChange={e => setFormData(prev => ({...prev, tags: e.target.value}))}
-                      className="w-full px-3 py-2 border rounded-md"
-                      placeholder="风景, 爬山, 溪流"
-                    />
+                    <label className="block text-sm font-medium text-slate-700 mb-1">标签选择</label>
+                    {tagsLoaded ? (
+                      <div className="border rounded-md p-3 h-32 overflow-y-auto">
+                        {allTags.length === 0 ? (
+                          <div className="text-slate-500 text-sm">暂无标签数据</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {allTags.map(tag => (
+                              <div key={tag.id} className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id={`tag-${tag.id}`}
+                                  checked={formData.tags.includes(tag.id)}
+                                  onChange={() => handleTagChange(tag.id)}
+                                  className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded"
+                                />
+                                <label htmlFor={`tag-${tag.id}`} className="ml-2 text-sm text-slate-700">
+                                  {tag.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="border rounded-md p-3 h-32 flex items-center justify-center text-slate-500">
+                        加载标签中...
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">状态</label>
@@ -252,36 +309,36 @@ export default function RouteModal({ isOpen, onClose, onSubmit, route }: RouteMo
                   </div>
                 </div>
             </div>
-          </div>
-
-          {/* Rich Text Editor */}
-          <div className="h-80 mb-6">
-             <label className="block text-sm font-medium text-slate-700 mb-1">
-               详细描述
-               {route && formData.description && (
-                 <span className="text-xs text-gray-500 ml-2">
-                   ({formData.description.length} 字符)
-                 </span>
-               )}
-             </label>
-             {dataLoaded ? (
-               <ReactQuill 
-                  key={route?.id || 'new-route'}
-                  theme="snow"
-                  value={formData.description}
-                  onChange={(value) => setFormData(prev => ({...prev, description: value}))}
-                  modules={modules}
-                  formats={formats}
-                  className="h-64"
-               />
-             ) : (
-               <div className="h-64 border rounded-md flex items-center justify-center text-gray-500">
-                 加载中...
-               </div>
-             )}
-          </div>
-          </form>
         </div>
+
+        {/* Rich Text Editor */}
+        <div className="h-80 mb-6">
+           <label className="block text-sm font-medium text-slate-700 mb-1">
+             详细描述
+             {route && formData.description && (
+               <span className="text-xs text-gray-500 ml-2">
+                 ({formData.description.length} 字符)
+               </span>
+             )}
+           </label>
+           {dataLoaded ? (
+             <ReactQuill 
+                key={route?.id || 'new-route'}
+                theme="snow"
+                value={formData.description}
+                onChange={(value) => setFormData(prev => ({...prev, description: value}))}
+                modules={modules}
+                formats={formats}
+                className="h-64"
+             />
+           ) : (
+             <div className="h-64 border rounded-md flex items-center justify-center text-gray-500">
+               加载中...
+             </div>
+           )}
+        </div>
+      </form>
+      </div>
 
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 shrink-0">

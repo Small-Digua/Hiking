@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Users, Map, LayoutDashboard, LogOut, Mountain, Building2 } from 'lucide-react';
+import { Users, Map, LayoutDashboard, LogOut, Mountain, Building2, Tag } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../services/supabase';
 import clsx from 'clsx';
@@ -49,6 +49,7 @@ export default function AdminLayout() {
     { path: '/admin/users', label: '用户管理', icon: Users },
     { path: '/admin/cities', label: '城市管理', icon: Building2 },
     { path: '/admin/routes', label: '路线管理', icon: Map },
+    { path: '/admin/tags', label: '标签管理', icon: Tag },
   ];
 
   return (

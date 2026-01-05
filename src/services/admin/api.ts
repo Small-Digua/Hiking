@@ -123,5 +123,49 @@ export const adminApi = {
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
+  },
+  
+  // Tags
+  getTags: async (params: any) => {
+    const headers = await getHeaders();
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/tags?${query}`, { headers });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  getAllTags: async () => {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_URL}/tags/all`, { headers });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  createTag: async (data: any) => {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_URL}/tags`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  updateTag: async (id: string, data: any) => {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_URL}/tags/${id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  deleteTag: async (id: string) => {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_URL}/tags/${id}`, {
+      method: 'DELETE',
+      headers
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
   }
 };

@@ -77,12 +77,14 @@ export default function Home() {
         // 手动处理类型，因为 Supabase join 查询的类型推导可能不完全
         // 确保 cities 字段存在
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.log('Fetched routes data:', data);
         const formattedRoutes = data.map((route: any) => ({
            ...route,
            // 如果是按城市查询，后端可能没返回 cities 关联对象（因为已经知道城市了）
            // 需要补全 cities 对象以便前端统一展示
            cities: route.cities || cities.find(c => c.id === route.city_id) || null
         }))
+        console.log('Formatted routes:', formattedRoutes);
         setRoutes(formattedRoutes)
       }
     } catch (err) {
@@ -330,6 +332,21 @@ export default function Home() {
                       <p className="text-sm text-slate-500 mb-3 line-clamp-2">
                           {route.cities?.name ? `位于：${route.cities.name}` : '探索未知的自然风光，享受徒步的乐趣。'}
                       </p>
+                      
+                      {/* 路线标签区 */}
+                      {route.tags && route.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                              {route.tags.map((tag, index) => (
+                                  <span
+                                      key={index}
+                                      className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors cursor-pointer"
+                                  >
+                                      {tag}
+                                  </span>
+                              ))}
+                          </div>
+                      )}
+                      
                       <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                         <div className="flex items-center text-sm text-slate-600">
                           <Route className="w-4 h-4 mr-2 text-emerald-500" /><span>{route.distance_km} km</span>

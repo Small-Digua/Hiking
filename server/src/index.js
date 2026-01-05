@@ -5,6 +5,7 @@ const userRoutes = require('./routes/userRoutes');
 const routeRoutes = require('./routes/routeRoutes');
 const cityRoutes = require('./routes/cityRoutes');
 const authRoutes = require('./routes/authRoutes');
+const tagRoutes = require('./routes/tagRoutes');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes); // Public auth routes
 app.use('/api/users', userRoutes);
 app.use('/api/routes', routeRoutes);
 app.use('/api/cities', cityRoutes);
+app.use('/api/tags', tagRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hiking Tracker Admin API is running');

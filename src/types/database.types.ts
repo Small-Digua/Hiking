@@ -105,6 +105,46 @@ export interface Database {
           created_at?: string
         }
       }
+      tags: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      route_tags: {
+        Row: {
+          id: string
+          route_id: string
+          tag_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          route_id: string
+          tag_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          route_id?: string
+          tag_id?: string
+          created_at?: string
+        }
+      }
       route_sections: {
         Row: {
           id: string
